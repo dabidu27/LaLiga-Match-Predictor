@@ -4,7 +4,14 @@ import pandas as pd
 import time
 from tqdm import tqdm
 import random
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+db_url = os.getenv('database_url')
+db_engine = create_engine(db_url)
 
 URL = "https://fbref.com/en/comps/12/La-Liga-Stats"
 
@@ -88,10 +95,12 @@ def get_team_data(team_url):
     team_name = team_url.split('/')[-1].replace('-Stats', "").replace('-', " ")
     team_data['Name'] = team_name
     team_data = team_data[team_data['Comp'] == 'La Liga']
+    
     return team_data
 
+#team_links = get_team_links(URL)
 #team_data = get_team_data(team_links[0])
-#print(team_data)
+#print(team_data.columns)
 
 
 #USE PREVIOUS FUNCTION TO SCRAPE DATA ALL TEAMS FOR MULTIPLE SEASONS
@@ -128,7 +137,7 @@ def scrape_all_seasons(start_year = 2025, end_year = 2022):
         with sync_playwright() as p:
 
             browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
+            page = browser.new_page(user_agent=random.choice(USER_AGENTS))
             page.goto(URL, timeout=60000)
             page.wait_for_selector('div#content')
             html = page.content()
@@ -145,5 +154,7 @@ def scrape_all_seasons(start_year = 2025, end_year = 2022):
 laliga_data = scrape_all_seasons()
 print(laliga_data)
 
+with db_engine.connect() as conn:
+    laliga_data.to_sql("matches", con=db_engine, if_exists='replace', index = False)
         
-
+print("Data successfully uploaded to PostgreSQL")
