@@ -58,7 +58,7 @@ print(matches_df)
 
 print(matches_df.dtypes)
 
-features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code', 'Poss', 'Sh', 'SoT', 'Dist', 'FK', 'PK', 'PKatt'] #excluded xG, xGA for the moment to stop the model from 'cheating'
+features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code'] #excluded xG, xGA for the moment to stop the model from 'cheating'
 
 X = matches_df[features]
 X.columns = X.columns.astype(str)
@@ -85,7 +85,7 @@ print(coef_importance)
 
 
 #Random Forest Classifier
-"""
+
 kf = KFold(n_splits = 5, shuffle = True, random_state = 42)
 RF = RandomForestClassifier(random_state = 42)
 
@@ -103,7 +103,7 @@ print('RandomForest Classifier evaluation: ')
 print('Accuracy: ', accuracy_score(y_test, y_pred))
 print('Confussion matrix: ', confusion_matrix(y_test, y_pred))
 print('Classification report', classification_report(y_test, y_pred))
-"""
+
 
 #xgboost
 
