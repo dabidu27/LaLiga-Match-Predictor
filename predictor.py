@@ -7,6 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 
 
 load_dotenv()
@@ -84,7 +85,7 @@ print(coef_importance)
 
 
 #Random Forest Classifier
-
+"""
 kf = KFold(n_splits = 5, shuffle = True, random_state = 42)
 RF = RandomForestClassifier(random_state = 42)
 
@@ -102,5 +103,28 @@ print('RandomForest Classifier evaluation: ')
 print('Accuracy: ', accuracy_score(y_test, y_pred))
 print('Confussion matrix: ', confusion_matrix(y_test, y_pred))
 print('Classification report', classification_report(y_test, y_pred))
+"""
 
+#xgboost
 
+xgb = XGBClassifier(random_state = 42, use_label_encoder = False, eval_metric = 'logloss')
+
+params_grid = {'n_estimators': [100, 200, 300], 'max_depth': [3,5,7], 'learning_rate': [0.01, 0.1, 0.2], 'subsample': [0.8, 1.0]}
+
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+xgb_cv = GridSearchCV(xgb, params_grid, cv=kf)
+
+xgb_cv.fit(X_train_scaled, y_train)
+
+print('Best parameters: ', xgb_cv.best_params_)
+print('Best accuracy: ', xgb_cv.best_score_)
+
+best_xgb = xgb_cv.best_estimator_
+
+y_pred = best_xgb.predict(X_test_scaled)
+
+print('XGBoost Evaluation: ')
+print('Accuracy: ', accuracy_score(y_test, y_pred))
+print('Confusion matrix: ', confusion_matrix(y_test, y_pred))
+print('Classification report: ', classification_report(y_test, y_pred))
