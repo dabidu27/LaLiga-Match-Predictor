@@ -2,7 +2,10 @@ from dotenv import load_dotenv
 import os
 from sqlalchemy import create_engine
 import pandas as pd
-
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 
 load_dotenv()
@@ -13,16 +16,71 @@ with engine.connect() as conn:
 
     matches_df = pd.read_sql_table("matches", con = engine)
 
+matches_df.columns = matches_df.columns.map(str)
+
 #CLEANING DATA
 print(matches_df.head())
 print(matches_df.isna().sum())
 matches_df = matches_df.drop(columns='Notes')
 print(matches_df.isna().sum())
+print(matches_df.info())
+
 
 matches_df['Date'] = pd.to_datetime(matches_df['Date'], errors = 'coerce')
-num_cols = ['GF', 'GA', 'Sh', 'SoT', 'Dist', 'FK', 'PK', 'PKatt', 'Poss']
+
+num_cols = ['GF', 'GA', 'Sh', 'SoT', 'Dist', 'FK', 'PK', 'PKatt', 'Poss', 'xG', 'xGA']
 matches_df[num_cols] = matches_df[num_cols].apply(pd.to_numeric, errors = 'coerce')
 print(matches_df.dtypes)
 
+str_cols = matches_df.select_dtypes(include='object').columns
+matches_df[str_cols] = matches_df[str_cols].apply(lambda x: x.str.strip())
+
+print(matches_df.head())
+
+print(matches_df.shape)
+print(matches_df['Name'].value_counts())
+print(matches_df['Round'].value_counts())
 
 #FEATURE ENGINEERING
+
+matches_df['Venue_code'] = matches_df['Venue'].astype('category').cat.codes
+matches_df['Opponent_code'] = matches_df['Opponent'].astype('category').cat.codes
+matches_df['Hour'] = matches_df['Time'].str.replace(':.+', '', regex=True).astype(int)
+matches_df['Day_code'] = matches_df['Date'].dt.dayofweek
+print(matches_df.head())
+
+#INITIAL ML MODELS
+
+matches_df['target'] = (matches_df['Result'] == 'W').astype(int) #1 for W, 0 for L/D
+print(matches_df)
+
+print(matches_df.dtypes)
+
+features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code', 'xG', 'xGA', 'Poss', 'Sh', 'SoT', 'Dist', 'FK', 'PK', 'PKatt']
+
+X = matches_df[features]
+X.columns = X.columns.astype(str)
+y = matches_df['target']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+#Logistic Regression model
+LR = LogisticRegression(max_iter=1000)
+LR.fit(X_train_scaled, y_train)
+y_pred = LR.predict(X_test_scaled)
+
+print('Logistic Regression Evaluation: ')
+print('Accuracy', accuracy_score(y_test, y_pred))
+print('Confussion matrix', confusion_matrix(y_test, y_pred))
+print('Classification report', classification_report(y_test, y_pred))
+
+
+
+
+
+
+
