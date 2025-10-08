@@ -151,10 +151,11 @@ def scrape_all_seasons(start_year = 2025, end_year = 2022):
     print(f"✅ Finished. Collected {len(all_seasons_data)} DataFrames.")
     return pd.concat(all_seasons_data, ignore_index=True)
 
-laliga_data = scrape_all_seasons()
-print(laliga_data)
+if __name__ == "__main__":
+    laliga_data = scrape_all_seasons()
+    print(laliga_data)
 
-with db_engine.connect() as conn:
-    laliga_data.to_sql("matches", con=db_engine, if_exists='replace', index = False)
-        
-print("Data successfully uploaded to PostgreSQL")
+    with db_engine.connect() as conn:
+        laliga_data.to_sql("matches", con=db_engine, if_exists='replace', index = False)
+            
+    print("Data successfully uploaded to PostgreSQL")
