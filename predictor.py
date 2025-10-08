@@ -2,10 +2,11 @@ from dotenv import load_dotenv
 import os
 from sqlalchemy import create_engine
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV, KFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.ensemble import RandomForestClassifier
 
 
 load_dotenv()
@@ -82,8 +83,24 @@ coef_importance = pd.DataFrame({'Features': features, 'Coefficient': LR.coef_[0]
 print(coef_importance)
 
 
+#Random Forest Classifier
 
+kf = KFold(n_splits = 5, shuffle = True, random_state = 42)
+RF = RandomForestClassifier(random_state = 42)
 
+param_grid = {'n_estimators': [50, 100, 200], 'min_samples_split': [2, 5, 10]}
+RF_cv = GridSearchCV(RF, param_grid, cv=kf)
+RF_cv.fit(X_train_scaled, y_train)
 
+print('Best parameters: ', RF_cv.best_params_)
+print('Best CV accuracy: ', RF_cv.best_score_)
+
+best_RF = RF_cv.best_estimator_
+y_pred = best_RF.predict(X_test_scaled)
+
+print('RandomForest Classifier evaluation: ')
+print('Accuracy: ', accuracy_score(y_test, y_pred))
+print('Confussion matrix: ', confusion_matrix(y_test, y_pred))
+print('Classification report', classification_report(y_test, y_pred))
 
 
