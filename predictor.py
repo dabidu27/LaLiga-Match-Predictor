@@ -56,7 +56,7 @@ print(matches_df)
 
 print(matches_df.dtypes)
 
-features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code', 'xG', 'xGA', 'Poss', 'Sh', 'SoT', 'Dist', 'FK', 'PK', 'PKatt']
+features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code', 'Poss', 'Sh', 'SoT', 'Dist', 'FK', 'PK', 'PKatt'] #excluded xG, xGA for the moment to stop the model from 'cheating'
 
 X = matches_df[features]
 X.columns = X.columns.astype(str)
@@ -77,6 +77,9 @@ print('Logistic Regression Evaluation: ')
 print('Accuracy', accuracy_score(y_test, y_pred))
 print('Confussion matrix', confusion_matrix(y_test, y_pred))
 print('Classification report', classification_report(y_test, y_pred))
+
+coef_importance = pd.DataFrame({'Features': features, 'Coefficient': LR.coef_[0]}).sort_values('Coefficient', ascending=False)
+print(coef_importance)
 
 
 
