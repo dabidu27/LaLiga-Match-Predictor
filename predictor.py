@@ -13,6 +13,7 @@ with engine.connect() as conn:
 
     matches_df = pd.read_sql_table("matches", con = engine)
 
+#CLEANING DATA
 print(matches_df.head())
 print(matches_df.isna().sum())
 matches_df = matches_df.drop(columns='Notes')
