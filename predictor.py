@@ -187,7 +187,7 @@ print('Classification report: ', classification_report(y_test, y_pred))
 
 coef_importance = pd.DataFrame({'features': features, 'coefficient': lr.coef_[0]}).sort_values('coefficient', ascending=False)
 print(coef_importance)
-
+"""
 #Random Forest
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
@@ -219,7 +219,17 @@ y_pred = best_xgb.predict(X_test)
 print('XGBoost Evaluation: ')
 print('Accuracy: ', accuracy_score(y_test, y_pred))
 
-
+"""
 #After evaluation, Logistic Regression proved to be the best model
+
+X_scaled_full = scaler.fit_transform(X)
+
+
+matches_df_rolling["Predicted_result"] = lr.predict(X_scaled_full)
+matches_df_rolling["Predicted_win_prob"] = lr.predict_proba(X_scaled_full)[:, 1]
+
+print(matches_df_rolling[['Name', 'Opponent', 'Date', 'Result', 'Predicted_result', 'Predicted_win_prob']])
+
+
 
 #elo rating
