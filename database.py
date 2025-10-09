@@ -3,7 +3,7 @@ import os
 import psycopg2
 
 load_dotenv()
-url = os.getenv("database_url")
+url = os.getenv("database_url").replace('+psycopg2', '')
 
 with psycopg2.connect(url) as conn:
 
@@ -39,7 +39,21 @@ with psycopg2.connect(url) as conn:
             name VARCHAR(100)
         );
                    """)
-
+    cursor.execute("""
+      CREATE TABLE IF NOT EXISTS upcoming_matches (
+            date DATE,
+            time VARCHAR(10),
+            comp VARCHAR(50),
+            round VARCHAR(50),
+            day VARCHAR(15),
+            venue VARCHAR(50),
+            name VARCHAR(100),
+            opponent VARCHAR(100),
+            venue_code INT,
+            hour INT,
+            day_code INT);
+        """)
+            
     conn.commit()
 
 print('Database created successfully')
