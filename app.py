@@ -10,6 +10,21 @@ load_dotenv()
 db_url = os.getenv('database_url')
 engine = create_engine(db_url)
 
+def standardize_team_name(team_name):
+    """Standardize team names to match historical data"""
+    name_mapping = {
+        'Betis': 'Real Betis',
+        'Sociedad': 'Real Sociedad',
+        'Athletic': 'Athletic Club',
+        'Athletic Bilbao': 'Athletic Club',
+        'Atlético Madrid': 'Atletico Madrid',
+        'Rayo': 'Rayo Vallecano',
+        'Villareal': 'Villarreal',  # Common spelling error
+        'Alavés': 'Alaves',
+        'Cádiz': 'Cadiz',
+        # Add more mappings as needed
+    }
+    return name_mapping.get(team_name, team_name)
 
 @st.cache_resource
 def load_models():
@@ -37,24 +52,34 @@ upcoming_matches = load_upcoming_matches()
 teams = sorted(upcoming_matches['Name'].unique())
 team = st.selectbox("Select a team:", teams)
 
+# ...existing code...
+
 if team:
     st.subheader(f"Next match for {team}")
     team_matches = upcoming_matches[upcoming_matches['Name'] == team]
 
     if not team_matches.empty:
         next_team_match = team_matches.iloc[0]
-        st.write(next_team_match[['Date', 'Opponent', 'Venue', 'Time', 'Round']])
-        opp = next_team_match['Opponent']
 
-        # --- Get last rolling stats for both teams ---
+        team = standardize_team_name(team)
+        opp = standardize_team_name(next_team_match['Opponent'])
+        
+        match_display = pd.DataFrame({
+            'Date': [next_team_match['Date'].strftime('%Y-%m-%d') if pd.notna(next_team_match['Date']) else 'TBD'],
+            'Opponent': [str(opp)],
+            'Venue': [str(next_team_match['Venue'])],
+            'Time': [str(next_team_match['Time']) if pd.notna(next_team_match['Time']) else 'TBD'],
+            'Round': [str(next_team_match['Round']) if pd.notna(next_team_match['Round']) else 'TBD']
+        })
+
+        st.write(match_display)
+
         team_last = matches_df_rolling[matches_df_rolling['Name'] == team].sort_values('Date').iloc[-1]
         opp_last = matches_df_rolling[matches_df_rolling['Name'] == opp].sort_values('Date').iloc[-1]
 
-        # --- Encode opponent ---
         opponent_categories = matches_df_rolling['Opponent'].astype('category').cat.categories
         opponent_code = list(opponent_categories).index(opp) if opp in opponent_categories else -1
 
-        # --- Create match DataFrame ---
         next_match = pd.DataFrame([{
             'Venue_code': next_team_match['Venue_code'],
             'Opponent_code': opponent_code,
@@ -87,9 +112,9 @@ if team:
 
         st.markdown("### Model Prediction")
         if pred == 1:
-            st.success(f"{team} is predicted to WIN")
+            st.success(f"{team} is predicted to WIN with {proba[1]: .2%} of winning")
         else:
-            st.warning(f"{team} likely to LOSE or DRAW!")
+            st.warning(f"{team} likely to LOSE or DRAW! with {proba[1]: .2%} of winning")
 
     else:
         st.warning("No upcoming match found for this team.")

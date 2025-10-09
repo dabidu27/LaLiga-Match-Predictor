@@ -167,6 +167,7 @@ opponent_stats.rename(columns= {'Name': 'Opponent', 'GF_roll': 'Opp_GF_roll', 'G
 matches_df_rolling = matches_df_rolling.merge(opponent_stats, on = ['Opponent', 'Date'], how = 'left')
 matches_df_rolling = matches_df_rolling.fillna(0)
 
+
 #print(matches_df_rolling)
 
 if __name__ == '__main__':
@@ -196,7 +197,7 @@ if __name__ == '__main__':
 
     coef_importance = pd.DataFrame({'features': features, 'coefficient': lr.coef_[0]}).sort_values('coefficient', ascending=False)
     print(coef_importance)
-    """
+    
     #Random Forest
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
@@ -228,7 +229,7 @@ if __name__ == '__main__':
     print('XGBoost Evaluation: ')
     print('Accuracy: ', accuracy_score(y_test, y_pred))
 
-    """
+    
     #After evaluation, Logistic Regression proved to be the best model
 
     X_scaled_full = scaler.fit_transform(X)
@@ -244,3 +245,4 @@ if __name__ == '__main__':
     joblib.dump(scaler, 'scaler.pkl')
 
     #elo rating
+

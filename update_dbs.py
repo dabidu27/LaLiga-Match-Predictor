@@ -29,6 +29,15 @@ def scrape_new_matches(team_links):
         print(f"Scraping {team.split('/')[-1].replace('-Stats', '').replace('-', ' ')}")
         team_data = get_team_data(team)
         team_data['Date'] = pd.to_datetime(team_data['Date'], errors = 'coerce')
+
+        if 'Attendance' in team_data.columns:
+            team_data['Attendance'] = (
+                team_data['Attendance']
+                .replace({',': ''}, regex=True)
+                .replace('-', None)
+            )
+            team_data['Attendance'] = pd.to_numeric(team_data['Attendance'], errors='coerce').astype('Int64')
+            
         new_matches = team_data[(team_data['Date'] > latest_date) & (team_data['Result'].notna())]
         upcoming_matches = team_data[(team_data['Date'] > latest_date) & (team_data['Result'].isna())]
         if not new_matches.empty:
