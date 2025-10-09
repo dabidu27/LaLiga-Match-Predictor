@@ -14,13 +14,10 @@ An end-to-end machine learning pipeline that scrapes, processes, and predicts La
   - [Data Pipeline](#data-pipeline)
   - [Machine Learning Models](#machine-learning-models)
   - [Feature Engineering](#feature-engineering)
-  - [Real-time Updates](#real-time-updates)
   - [Web Application](#web-application)
   - [Project Structure](#project-structure)
   - [Configuration](#configuration)
-  - [Usage Examples](#usage-examples)
   - [Model Performance](#model-performance)
-  - [Future Enhancements](#future-enhancements)
   - [Contributing](#contributing)
   - [License](#license)
 
