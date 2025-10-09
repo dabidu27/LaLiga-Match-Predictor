@@ -1,9 +1,9 @@
-from dotenv import load_dotenv
-import os
-import psycopg2
 
-load_dotenv()
-url = os.getenv("database_url").replace('+psycopg2', '')
+import psycopg2
+import streamlit as st
+
+
+url = st.secrets["database_url"].replace('+psycopg2', '')
 
 with psycopg2.connect(url) as conn:
 

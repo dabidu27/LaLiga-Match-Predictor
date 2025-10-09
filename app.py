@@ -3,11 +3,10 @@ import pandas as pd
 import joblib
 from predictor import matches_df_rolling
 from sqlalchemy import create_engine
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
-db_url = os.getenv('database_url')
+
+
+db_url = st.secrets['database_url']
 engine = create_engine(db_url)
 
 def standardize_team_name(team_name):

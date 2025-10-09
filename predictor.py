@@ -1,5 +1,4 @@
-from dotenv import load_dotenv
-import os
+import streamlit as st
 from sqlalchemy import create_engine
 import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold, cross_val_score
@@ -11,8 +10,7 @@ from xgboost import XGBClassifier
 import joblib
 
     
-load_dotenv()
-db_url = os.getenv('database_url')
+db_url = st.secrets['database_url']
 engine = create_engine(db_url)
 
 with engine.connect() as conn:

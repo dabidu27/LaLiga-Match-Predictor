@@ -5,12 +5,11 @@ import time
 from tqdm import tqdm
 import random
 from sqlalchemy import create_engine
-from dotenv import load_dotenv
-import os
+import streamlit as st
 
-load_dotenv()
 
-db_url = os.getenv('database_url')
+
+db_url = st.secrets['database_url']
 db_engine = create_engine(db_url)
 
 URL = "https://fbref.com/en/comps/12/La-Liga-Stats"

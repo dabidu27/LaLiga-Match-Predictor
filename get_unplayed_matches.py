@@ -3,11 +3,9 @@ from playwright.sync_api import sync_playwright
 import pandas as pd
 import random
 from sqlalchemy import create_engine
-from dotenv import load_dotenv
-import os
+import streamlit as st
 
-load_dotenv()
-db_url = os.getenv('database_url')
+db_url = st.secrets['database_url']
 engine = create_engine(db_url)
 
 
