@@ -26,7 +26,7 @@ An end-to-end machine learning pipeline that scrapes, processes, and predicts La
 
 ## Project Overview
 
-This comprehensive ML pipeline predicts LaLiga match outcomes by analyzing historical match data, team performance metrics, and advanced statistical features. The system automatically scrapes data from FBRef, processes it through sophisticated feature engineering, and serves predictions via an interactive Streamlit web application.
+This comprehensive ML pipeline predicts LaLiga match outcomes by analyzing historical match data, team performance metrics, and advanced statistical features. The system automatically scrapes data from FBRef, processes it through feature engineering, and serves predictions via an interactive Streamlit web application.
 
 **Prediction Accuracy: 65-70% on test data**
 
@@ -35,7 +35,7 @@ This comprehensive ML pipeline predicts LaLiga match outcomes by analyzing histo
 - **Automated Web Scraping**: Robust Playwright-based scraper with anti-detection measures
 - **PostgreSQL Integration**: Scalable database architecture for match data storage
 - **Advanced Feature Engineering**: Rolling averages, opponent statistics, and temporal features
-- **Multiple ML Models**: Logistic Regression, Random Forest, and XGBoost implementations
+- **Multiple ML Models**: Comparing Logistic Regression, Random Forest, and XGBoost implementations
 - **Real-time Predictions**: Live prediction system for upcoming matches
 - **Interactive Web App**: Streamlit-powered interface for match predictions
 - **Incremental Updates**: Smart data pipeline that only scrapes new matches
@@ -181,28 +181,7 @@ CREATE TABLE matches (
 | Random Forest | 66.2% | 0.67 | 0.66 | 0.66 |
 | XGBoost | 65.8% | 0.66 | 0.66 | 0.66 |
 
-### Why Logistic Regression Won?
 
-1. **Interpretability**: Clear coefficient analysis for feature importance
-2. **Stability**: Consistent performance across different data splits
-3. **Efficiency**: Fast training and prediction times
-4. **Generalization**: Best performance on unseen test data
-
-### Feature Importance (Top 10)
-
-```python
-# Top predictive features
-1. Points_roll (Recent form)          +0.45
-2. Opp_Points_roll (Opponent form)    -0.38
-3. GF_roll (Goal scoring form)        +0.32
-4. Venue_code (Home advantage)        +0.28
-5. GA_roll (Defensive form)           -0.25
-6. Opp_GF_roll (Opponent attack)      -0.22
-7. SoT_roll (Shot accuracy)           +0.19
-8. Day_code (Match day effect)        +0.15
-9. Hour (Kick-off time impact)        +0.12
-10. Opponent_code (Head-to-head)      +0.08
-```
 
 ## Feature Engineering
 
@@ -224,23 +203,6 @@ def rolling_averages(group, cols, new_col):
 2. **Form Weighting**: Recent matches weighted more heavily
 3. **Venue Encoding**: Home/away advantage quantification
 4. **Temporal Patterns**: Match day and time impact analysis
-
-## Real-time Updates
-
-### Automated Data Pipeline
-
-```python
-# Smart incremental updates
-def scrape_new_matches():
-    latest_date = get_latest_db_date()
-    new_matches = scrape_since(latest_date)
-    update_database(new_matches)
-```
-
-### Update Schedule
-- **Daily**: Check for new match results
-- **Weekly**: Update upcoming fixtures
-- **Monthly**: Model retraining with new data
 
 ## Web Application
 
@@ -284,12 +246,9 @@ laliga_ml/
 ├── 
 ├── app.py                # Streamlit web application
 ├── 
-├── models/
-│   ├── lr_model.pkl      # Trained logistic regression
-│   └── scaler.pkl        # Feature scaler
+├── lr_model.pkl          # Trained logistic regression
+├── scaler.pkl            # Feature scaler
 ├── 
-└── data/
-    └── laliga_standings.csv # Latest standings data
 ```
 
 ## Configuration
@@ -314,45 +273,6 @@ RANDOM_STATE = 42          # Reproducibility
 MAX_ITER = 1000           # Logistic regression iterations
 ```
 
-## Usage Examples
-
-### 1. Scrape Latest Season Data
-```python
-from scraper import scrape_all_seasons
-
-# Scrape last 3 seasons
-data = scrape_all_seasons(start_year=2024, end_year=2022)
-print(f"Scraped {len(data)} matches")
-```
-
-### 2. Train Custom Model
-```python
-from predictor import matches_df_rolling
-from sklearn.linear_model import LogisticRegression
-
-# Custom feature selection
-features = ['GF_roll', 'GA_roll', 'Points_roll', 'Venue_code']
-X = matches_df_rolling[features]
-y = matches_df_rolling['target']
-
-# Train model
-model = LogisticRegression()
-model.fit(X, y)
-```
-
-### 3. Make Predictions
-```python
-import joblib
-
-# Load trained model
-model = joblib.load('lr_model.pkl')
-scaler = joblib.load('scaler.pkl')
-
-# Predict match outcome
-prediction = model.predict_proba(match_features)
-print(f"Win probability: {prediction[0][1]:.2%}")
-```
-
 ## Model Performance
 
 ### Confusion Matrix
@@ -366,36 +286,6 @@ Accuracy: 71.2%
 Precision: 69.5%
 Recall: 68.3%
 ```
-
-### Performance by Team Strength
-- **Top 6 teams**: 74% accuracy
-- **Mid-table teams**: 68% accuracy  
-- **Bottom 6 teams**: 71% accuracy
-
-### Prediction Confidence Distribution
-- **High confidence (>70%)**: 45% of predictions, 78% accuracy
-- **Medium confidence (50-70%)**: 40% of predictions, 65% accuracy
-- **Low confidence (<50%)**: 15% of predictions, 52% accuracy
-
-## Future Enhancements
-
-### Phase 2 Roadmap
-- [ ] **Player Impact Analysis**: Individual player statistical integration
-- [ ] **Injury Data**: Team availability and fitness metrics
-- [ ] **Weather Conditions**: Match day weather impact analysis
-- [ ] **Referee Analysis**: Historical referee bias patterns
-
-### Phase 3 Roadmap
-- [ ] **Transfer Window Impact**: New signings performance prediction
-- [ ] **European Competition Load**: Champions League/Europa League fatigue
-- [ ] **Social Media Sentiment**: Fan confidence indicators
-- [ ] **Betting Odds Integration**: Market efficiency analysis
-
-### Technical Improvements
-- [ ] **Model Ensemble**: Combine multiple algorithms for better accuracy
-- [ ] **Real-time Streaming**: Live match data integration
-- [ ] **API Development**: RESTful API for external integrations
-- [ ] **Mobile App**: React Native mobile application
 
 ## Contributing
 
@@ -427,7 +317,3 @@ python -m pytest tests/
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-**Made with passion for football analytics and machine learning**
-
-*This project is for educational and research purposes. Please gamble responsibly.*
