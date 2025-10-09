@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 import joblib
 
-
+    
 load_dotenv()
 db_url = os.getenv('database_url')
 engine = create_engine(db_url)
@@ -167,76 +167,80 @@ opponent_stats.rename(columns= {'Name': 'Opponent', 'GF_roll': 'Opp_GF_roll', 'G
 matches_df_rolling = matches_df_rolling.merge(opponent_stats, on = ['Opponent', 'Date'], how = 'left')
 matches_df_rolling = matches_df_rolling.fillna(0)
 
-print(matches_df_rolling)
+#print(matches_df_rolling)
 
-#test models
-features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code', 'GF_roll', 'GA_roll', 'Sh_roll', 'SoT_roll', 'Dist_roll', 'FK_roll', 'PK_roll', 'PKatt_roll', 'Points_roll', 'Opp_GF_roll', 'Opp_GA_roll', 'Opp_Sh_roll', 'Opp_SoT_roll', 'Opp_Dist_roll', 'Opp_FK_roll', 'Opp_PK_roll', 'Opp_PKatt_roll', 'Opp_Points_roll']
+if __name__ == '__main__':
 
-X = matches_df_rolling[features]
-X.columns = X.columns.astype(str)
+    #test models
+    features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code', 'GF_roll', 'GA_roll', 'Sh_roll', 'SoT_roll', 'Dist_roll', 'FK_roll', 'PK_roll', 'PKatt_roll', 'Points_roll', 'Opp_GF_roll', 'Opp_GA_roll', 'Opp_Sh_roll', 'Opp_SoT_roll', 'Opp_Dist_roll', 'Opp_FK_roll', 'Opp_PK_roll', 'Opp_PKatt_roll', 'Opp_Points_roll']
 
-y = matches_df_rolling['target']
+    X = matches_df_rolling[features]
+    X.columns = X.columns.astype(str)
 
-#Logistic Regression
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+    y = matches_df_rolling['target']
 
-lr = LogisticRegression(max_iter=1000)
-lr.fit(X_train_scaled, y_train)
-y_pred = lr.predict(X_test_scaled)
+    #Logistic Regression
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
-print('Logistic Regression Evaluation: ')
-print('Accuracy: ', accuracy_score(y_test, y_pred))
-print('Confussion matrix: ', confusion_matrix(y_test, y_pred))
-print('Classification report: ', classification_report(y_test, y_pred))
+    lr = LogisticRegression(max_iter=1000)
+    lr.fit(X_train_scaled, y_train)
+    y_pred = lr.predict(X_test_scaled)
 
-coef_importance = pd.DataFrame({'features': features, 'coefficient': lr.coef_[0]}).sort_values('coefficient', ascending=False)
-print(coef_importance)
-"""
-#Random Forest
+    print('Logistic Regression Evaluation: ')
+    print('Accuracy: ', accuracy_score(y_test, y_pred))
+    print('Confussion matrix: ', confusion_matrix(y_test, y_pred))
+    print('Classification report: ', classification_report(y_test, y_pred))
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+    coef_importance = pd.DataFrame({'features': features, 'coefficient': lr.coef_[0]}).sort_values('coefficient', ascending=False)
+    print(coef_importance)
+    """
+    #Random Forest
 
-kf = KFold(n_splits=5, shuffle=True, random_state=42)
-rf = RandomForestClassifier(random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-param_grid = {'n_estimators': [50, 100, 200], 'min_samples_split': [2, 5, 10]}
-rf_cv = GridSearchCV(rf, param_grid=param_grid, cv = kf)
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    rf = RandomForestClassifier(random_state=42)
 
-rf_cv.fit(X_train, y_train)
-best_rf = rf_cv.best_estimator_
-y_pred = best_rf.predict(X_test)
+    param_grid = {'n_estimators': [50, 100, 200], 'min_samples_split': [2, 5, 10]}
+    rf_cv = GridSearchCV(rf, param_grid=param_grid, cv = kf)
 
-print('Random Forest Evaluation: ')
-print('Accuracy: ', accuracy_score(y_test, y_pred))
+    rf_cv.fit(X_train, y_train)
+    best_rf = rf_cv.best_estimator_
+    y_pred = best_rf.predict(X_test)
 
-#XGBoost
+    print('Random Forest Evaluation: ')
+    print('Accuracy: ', accuracy_score(y_test, y_pred))
 
-xgb = XGBClassifier(random_state = 42, use_label_encoder = False, eval_metric = 'logloss')
+    #XGBoost
 
-params_grid = {'n_estimators': [100, 200, 300], 'max_depth': [3,5,7], 'learning_rate': [0.01, 0.1, 0.2], 'subsample': [0.8, 1.0]}
-xgb_cv = GridSearchCV(xgb, params_grid, cv = kf)
-xgb_cv.fit(X_train, y_train)
+    xgb = XGBClassifier(random_state = 42, use_label_encoder = False, eval_metric = 'logloss')
 
-best_xgb = xgb_cv.best_estimator_
-y_pred = best_xgb.predict(X_test)
+    params_grid = {'n_estimators': [100, 200, 300], 'max_depth': [3,5,7], 'learning_rate': [0.01, 0.1, 0.2], 'subsample': [0.8, 1.0]}
+    xgb_cv = GridSearchCV(xgb, params_grid, cv = kf)
+    xgb_cv.fit(X_train, y_train)
 
-print('XGBoost Evaluation: ')
-print('Accuracy: ', accuracy_score(y_test, y_pred))
+    best_xgb = xgb_cv.best_estimator_
+    y_pred = best_xgb.predict(X_test)
 
-"""
-#After evaluation, Logistic Regression proved to be the best model
+    print('XGBoost Evaluation: ')
+    print('Accuracy: ', accuracy_score(y_test, y_pred))
 
-X_scaled_full = scaler.fit_transform(X)
+    """
+    #After evaluation, Logistic Regression proved to be the best model
 
-
-matches_df_rolling["Predicted_result"] = lr.predict(X_scaled_full)
-matches_df_rolling["Predicted_win_prob"] = lr.predict_proba(X_scaled_full)[:, 1]
-
-print(matches_df_rolling[['Name', 'Opponent', 'Date', 'Result', 'Predicted_result', 'Predicted_win_prob']])
+    X_scaled_full = scaler.fit_transform(X)
 
 
+    matches_df_rolling["Predicted_result"] = lr.predict(X_scaled_full)
+    matches_df_rolling["Predicted_win_prob"] = lr.predict_proba(X_scaled_full)[:, 1]
 
-#elo rating
+    print(matches_df_rolling[['Name', 'Opponent', 'Date', 'Result', 'Predicted_result', 'Predicted_win_prob']])
+
+
+    joblib.dump(lr, 'lr_model.pkl')
+    joblib.dump(scaler, 'scaler.pkl')
+
+    #elo rating
