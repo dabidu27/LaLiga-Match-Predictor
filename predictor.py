@@ -170,6 +170,29 @@ matches_df_rolling = matches_df_rolling.fillna(0)
 
 if __name__ == '__main__':
 
+    points = {'W': 3, 'D': 1, 'L': 0}
+    matches_df['Points'] = matches_df['Result'].map(points)
+    print(matches_df.head())
+
+    #rolling averages
+
+    grouped_matches = matches_df.groupby('Name')
+    #group = grouped_matches.get_group('Real Madrid')
+    #print(group)
+
+    cols = ['GF', 'GA', 'Sh', 'SoT', 'Dist', 'FK', 'PK', 'PKatt', 'Points']
+    new_cols = [f"{c}_roll" for c in cols]
+
+    matches_df_rolling = matches_df.groupby('Name').apply(lambda x: rolling_averages(x, cols, new_cols))
+    matches_df_rolling = matches_df_rolling.droplevel('Name')
+    matches_df_rolling.index = range(matches_df_rolling.shape[0])
+
+    opponent_stats = matches_df_rolling[['Name', 'Date', 'GF_roll', 'GA_roll', 'Sh_roll', 'SoT_roll', 'Dist_roll', 'FK_roll', 'PK_roll', 'PKatt_roll', 'Points_roll']]
+    opponent_stats.rename(columns= {'Name': 'Opponent', 'GF_roll': 'Opp_GF_roll', 'GA_roll': 'Opp_GA_roll','Sh_roll': 'Opp_Sh_roll', 'SoT_roll': 'Opp_SoT_roll', 'Dist_roll': 'Opp_Dist_roll', 'FK_roll': 'Opp_FK_roll', 'PK_roll': 'Opp_PK_roll', 'PKatt_roll': 'Opp_PKatt_roll', 'Points_roll': 'Opp_Points_roll'}, inplace=True)
+
+    matches_df_rolling = matches_df_rolling.merge(opponent_stats, on = ['Opponent', 'Date'], how = 'left')
+    matches_df_rolling = matches_df_rolling.fillna(0)
+
     #test models
     features = ['Venue_code', 'Opponent_code', 'Hour', 'Day_code', 'GF_roll', 'GA_roll', 'Sh_roll', 'SoT_roll', 'Dist_roll', 'FK_roll', 'PK_roll', 'PKatt_roll', 'Points_roll', 'Opp_GF_roll', 'Opp_GA_roll', 'Opp_Sh_roll', 'Opp_SoT_roll', 'Opp_Dist_roll', 'Opp_FK_roll', 'Opp_PK_roll', 'Opp_PKatt_roll', 'Opp_Points_roll']
 

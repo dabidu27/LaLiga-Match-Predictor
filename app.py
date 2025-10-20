@@ -73,6 +73,10 @@ if team:
 
         st.write(match_display)
 
+        matches_df_rolling['Date'] = pd.to_datetime(matches_df_rolling['Date'], errors='coerce')
+        matches_df_rolling = matches_df_rolling.dropna(subset=['Date'])
+
+
         team_last = matches_df_rolling[matches_df_rolling['Name'] == team].sort_values('Date').iloc[-1]
         opp_last = matches_df_rolling[matches_df_rolling['Name'] == opp].sort_values('Date').iloc[-1]
 
